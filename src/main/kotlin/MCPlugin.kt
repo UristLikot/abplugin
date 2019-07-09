@@ -17,10 +17,12 @@ import org.spongepowered.api.command.spec.CommandSpec
 import org.spongepowered.api.config.ConfigDir
 import org.spongepowered.api.config.DefaultConfig
 import org.spongepowered.api.event.Listener
+import org.spongepowered.api.event.game.state.GameInitializationEvent
 import org.spongepowered.api.event.game.state.GameStartedServerEvent
 import org.spongepowered.api.event.game.state.GameStartingServerEvent
 import org.spongepowered.api.event.network.ClientConnectionEvent
 import org.spongepowered.api.event.user.BanUserEvent
+import org.spongepowered.api.plugin.Dependency
 import org.spongepowered.api.plugin.Plugin
 import org.spongepowered.api.profile.ProfileNotFoundException
 import org.spongepowered.api.service.ban.BanService
@@ -40,14 +42,21 @@ import kotlin.reflect.typeOf
 
 val db = DbHandler()
 
-@Plugin(id = "abplugin", name = "abplugin", version = "0.0.1", description = "My first plugin")
+@Plugin(id = "abplugin", name = "abplugin", version = "0.0.1", description = "My first plugin",authors = ["UristLikot"],dependencies = arrayOf(Dependency(id = "spotlin",
+    optional = false,
+    version = "0.2.0")))
 class mcplugin {
     @Inject
     lateinit var logger: Logger
 
     @Listener
-    fun onServerStart(event: GameStartedServerEvent) {
-        db.createDb()
+    fun onServerStart(event: GameInitializationEvent) {
+        try{
+            db.createDb()
+        }catch (e:Exception){
+            println("Can't create DB")
+        }
+
         logger.info("Successfully running abplugin.")
 
 
@@ -95,34 +104,37 @@ class mcplugin {
     }
 
     @Listener
-    fun regBan(event: GameStartingServerEvent) {
-        logger.info("Successfully registered aban.")
+    fun regBan(event:  GameInitializationEvent) {
         try {
-            getCommandManager().register(this, banCommand, "aban")
-        } catch (e: IllegalArgumentException) {
 
+            getCommandManager().register(this, banCommand, "aban")
+            logger.info("Successfully registered aban.")
+        } catch (e: Exception) {
+            println("Can't register aban")
         }
 
     }
 
     @Listener
-    fun refrBan(event: GameStartingServerEvent) {
-        logger.info("Successfully registered refresh.")
+    fun refrBan(event:  GameInitializationEvent) {
+
         try {
             getCommandManager().register(this, refBanCommand, "refbans")
-        } catch (e: IllegalArgumentException) {
-
+            logger.info("Successfully registered refresh.")
+        } catch (e: Exception) {
+            println("Can't register uban")
         }
 
     }
 
     @Listener
-    fun reguBan(event: GameStartingServerEvent) {
-        logger.info("Successfully registered uban.")
+    fun reguBan(event: GameInitializationEvent) {
+
         try {
             getCommandManager().register(this, ubanCommand, "uban")
-        } catch (e: IllegalArgumentException) {
-
+            logger.info("Successfully registered refban.")
+        } catch (e: Exception) {
+            println("Can't register refban")
         }
 
     }
