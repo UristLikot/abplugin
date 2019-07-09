@@ -1,0 +1,27 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.3.41'
+    id 'org.spongepowered.plugin' version '0.9.0'
+}
+compileJava.options.encoding = 'UTF-8'
+group 'com.gmail.chipkazakov.abplugin'
+version '0.0.1'
+subprojects {
+    apply plugin: "kotlin"
+}
+repositories {
+    mavenCentral()
+    jcenter()
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    compile 'org.spongepowered:spongeapi:7.1.0'
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
