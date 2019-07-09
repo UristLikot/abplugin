@@ -2,6 +2,8 @@
 Sponge ban plugin with SQL sync.
 Works with **MariaDB**.
 
+Depend on https://ore.spongepowered.org/pxlpowered/spotlin
+
 #### Set up:
 
 Open `config\sponge\global.conf`
