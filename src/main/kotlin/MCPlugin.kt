@@ -109,7 +109,7 @@ class mcplugin {
     fun refrBan(event: GameStartingServerEvent) {
         logger.info("Successfully registered refresh.")
         try {
-            getCommandManager().register(this, refrBanCommand, "refrbans")
+            getCommandManager().register(this, refBanCommand, "refbans")
         } catch (e: IllegalArgumentException) {
 
         }
@@ -209,8 +209,8 @@ val ubanCommand = CommandSpec.builder()
                 .buildWith(GenericArguments.onlyOne(GenericArguments.string(Text.of("player")))))
         .executor(uBanCommand())
         .build()
-val refrBanCommand = CommandSpec.builder()
-        .arguments(GenericArguments.flags().permissionFlag("abplugin.refrbans",
+val refBanCommand = CommandSpec.builder()
+        .arguments(GenericArguments.flags().permissionFlag("abplugin.refbans",
                 "s").buildWith(GenericArguments.none()))
         .executor(refreshBanCommand())
         .build()
