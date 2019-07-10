@@ -58,7 +58,7 @@ class DbHandler {
         getDataSource(uri).connection.use { conn ->
             conn.prepareStatement(sql).use { stmt ->
                 try {
-                    stmt.executeQuery().use { results ->
+                    stmt.executeQuery().use { _ ->
                         println("already exist")
                         conn.close()
                     }
@@ -79,7 +79,7 @@ class DbHandler {
         getDataSource(uri).connection.use { conn ->
             conn.prepareStatement(sql).use { stmt ->
                 try {
-                    stmt.executeQuery().use { results ->
+                    stmt.executeQuery().use { _ ->
                         println("deleted")
                         conn.close()
                     }
@@ -107,7 +107,7 @@ class DbHandler {
         getDataSource(uri).connection.use { conn ->
             conn.prepareStatement(sql).use { stmt ->
                 try {
-                    stmt.executeQuery().use { results ->
+                    stmt.executeQuery().use { _ ->
                         println("refresh complete")
                         conn.close()
                     }

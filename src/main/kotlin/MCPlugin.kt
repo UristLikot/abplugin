@@ -42,18 +42,29 @@ import kotlin.reflect.typeOf
 
 val db = DbHandler()
 
-@Plugin(id = "abplugin", name = "abplugin", version = "0.0.1", description = "My first plugin",authors = ["UristLikot"],dependencies = arrayOf(Dependency(id = "spotlin",
-    optional = false,
-    version = "0.2.0")))
+@Plugin(
+    id = "abplugin",
+    name = "abplugin",
+    version = "0.0.1",
+    description = "My first plugin",
+    authors = ["UristLikot"],
+    dependencies = arrayOf(
+        Dependency(
+            id = "spotlin",
+            optional = false,
+            version = "0.2.0"
+        )
+    )
+)
 class mcplugin {
     @Inject
     lateinit var logger: Logger
 
     @Listener
     fun onServerStart(event: GameInitializationEvent) {
-        try{
+        try {
             db.createDb()
-        }catch (e:Exception){
+        } catch (e: Exception) {
             println("Can't create DB")
         }
 
@@ -65,22 +76,26 @@ class mcplugin {
 
     @Listener
     fun loadToDb(event: BanUserEvent) {
-        event.ban.profile
-        val uuid = event.ban.profile.uniqueId.toString()
-        val name = event.ban.profile.name.get()
-        val created = event.ban.creationDate
-        val myDateCr = Date.from(created)
-        var source = event.ban.banSource.get().toString()
-        val expires = event.ban.expirationDate.get()
-        val myDateExp = Date.from(expires)
-        val reason = event.ban.reason.get().toString().replace("Text{", "").replace("}", "")
-        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-        val finCr = formatter.format(myDateCr)
-        val finExp = formatter.format(myDateExp)
-        if ("Unknown" in source) {
-            source = "Server"
+        try {
+            event.ban.profile
+            val uuid = event.ban.profile.uniqueId.toString()
+            val name = event.ban.profile.name.get()
+            val created = event.ban.creationDate
+            val myDateCr = Date.from(created)
+            var source = event.ban.banSource.get().toString()
+            val expires = event.ban.expirationDate.get()
+            val myDateExp = Date.from(expires)
+            val reason = event.ban.reason.get().toString().replace("Text{", "").replace("}", "")
+            val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+            val finCr = formatter.format(myDateCr)
+            val finExp = formatter.format(myDateExp)
+            if ("Unknown" in source) {
+                source = "Server"
+            }
+            db.addBanToDb(uuid, name, finCr, source, finExp, reason)
+        } catch (e: Exception) {
+            println("Can't add user to DB.")
         }
-        db.addBanToDb(uuid, name, finCr, source, finExp, reason)
     }
 
     @Listener
@@ -104,7 +119,7 @@ class mcplugin {
     }
 
     @Listener
-    fun regBan(event:  GameInitializationEvent) {
+    fun regBan(event: GameInitializationEvent) {
         try {
 
             getCommandManager().register(this, banCommand, "aban")
@@ -116,7 +131,7 @@ class mcplugin {
     }
 
     @Listener
-    fun refrBan(event:  GameInitializationEvent) {
+    fun refrBan(event: GameInitializationEvent) {
 
         try {
             getCommandManager().register(this, refBanCommand, "refbans")
@@ -149,13 +164,15 @@ class BanCommand : CommandExecutor {
             val message = args.getAll<String>("reason").toString().replace("[", "").replace("]", "")
             val time = args.getAll<Double>("time(hours)").toString().replace("[", "").replace("]", "").toDouble()
             val instant = Instant.ofEpochMilli(Date().getTime()).plus(Duration.ofHours(time.toLong()))
-            service.addBan((Ban.builder()
+            service.addBan(
+                (Ban.builder()
                     .type(BanTypes.PROFILE)
                     .profile(pn)
                     .source(Text.of(src.name))
                     .reason(Text.of(message))
                     .expirationDate(instant)
-                    .build()))
+                    .build())
+            )
             if (Sponge.getServer().getPlayer(pName).isPresent) {
                 Sponge.getServer().getPlayer(pName).get().kick()
             }
@@ -171,18 +188,22 @@ class BanCommand : CommandExecutor {
 class uBanCommand : CommandExecutor {
 
     override fun execute(src: CommandSource, args: CommandContext): CommandResult {
-        val pName = args.getOne<String>("player").get()
-        val pn = Sponge.getServer().gameProfileManager.get(pName).get()
-        service.pardon(pn)
-        db.removeFromDb(pName)
+        try {
+            val pName = args.getOne<String>("player").get()
+            val pn = Sponge.getServer().gameProfileManager.get(pName).get()
+            service.pardon(pn)
+            db.removeFromDb(pName)
+        } catch (e: Exception) {
+            println("Player not found")
+        }
         return CommandResult.success()
     }
-
 }
 
 class refreshBanCommand : CommandExecutor {
 
     override fun execute(src: CommandSource, args: CommandContext): CommandResult {
+
         val configPath = File("banned-players.json")
         val potentialFile = GsonConfigurationLoader.builder().setFile(configPath).build()
         val gsonList = potentialFile.load()
@@ -203,26 +224,33 @@ class refreshBanCommand : CommandExecutor {
         }
         return CommandResult.success()
     }
-
 }
+
 
 val service = Sponge.getServiceManager().provide(BanService::class.java).get()
 val banCommand = CommandSpec.builder()
-        .arguments(
-                GenericArguments.onlyOne(GenericArguments.string(Text.of("player"))),
-                GenericArguments.doubleNum(Text.of("time(minutes)")),
-                GenericArguments.flags().permissionFlag("abplugin.aban", "s").buildWith(GenericArguments.none()),
-                GenericArguments.remainingJoinedStrings(Text.of("reason")))
-        .executor(BanCommand())
-        .build()
+    .arguments(
+        GenericArguments.onlyOne(GenericArguments.string(Text.of("player"))),
+        GenericArguments.doubleNum(Text.of("time(minutes)")),
+        GenericArguments.flags().permissionFlag("abplugin.aban", "s").buildWith(GenericArguments.none()),
+        GenericArguments.remainingJoinedStrings(Text.of("reason"))
+    )
+    .executor(BanCommand())
+    .build()
 
 val ubanCommand = CommandSpec.builder()
-        .arguments(GenericArguments.flags().permissionFlag("abplugin.uban", "s")
-                .buildWith(GenericArguments.onlyOne(GenericArguments.string(Text.of("player")))))
-        .executor(uBanCommand())
-        .build()
+    .arguments(
+        GenericArguments.flags().permissionFlag("abplugin.uban", "s")
+            .buildWith(GenericArguments.onlyOne(GenericArguments.string(Text.of("player"))))
+    )
+    .executor(uBanCommand())
+    .build()
 val refBanCommand = CommandSpec.builder()
-        .arguments(GenericArguments.flags().permissionFlag("abplugin.refbans",
-                "s").buildWith(GenericArguments.none()))
-        .executor(refreshBanCommand())
-        .build()
+    .arguments(
+        GenericArguments.flags().permissionFlag(
+            "abplugin.refbans",
+            "s"
+        ).buildWith(GenericArguments.none())
+    )
+    .executor(refreshBanCommand())
+    .build()

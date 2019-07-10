@@ -4,7 +4,7 @@ plugins {
 }
 compileJava.options.encoding = 'UTF-8'
 group 'com.gmail.chipkazakov.abplugin'
-version '0.0.1'
+version '0.0.3'
 subprojects {
     apply plugin: "kotlin"
 }
