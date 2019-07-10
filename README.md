@@ -2,6 +2,8 @@
 Sponge ban plugin with SQL sync.
 Works with **MariaDB**.
 
+**Depend **on https://ore.spongepowered.org/pxlpowered/spotlin
+
 #### Set up:
 
 Open `config\sponge\global.conf`
@@ -17,11 +19,11 @@ Open `config\sponge\global.conf`
 #### Usage:
 Avalible commands:
 
-/aban (player) (time) (reason)
+/aban (player) (time) (reason) - bans player for given amount of hours.
 
-/uban (player)
+/uban (player) - pardon player.
 
-/refbans
+/refbans - refresh bans from banned-players.json with DB.
 
 Time is entered in hours.
 
